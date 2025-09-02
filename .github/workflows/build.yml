@@ -1,0 +1,32 @@
+name: Build STM8 Firmware
+
+on:
+  push:
+    branches: [ "main" ]     # Jab main branch pe push hoga
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install SDCC (STM8 compiler)
+        run: sudo apt-get update && sudo apt-get install -y sdcc make
+
+      - name: Build firmware
+        run: |
+          make              # agar aapke repo me Makefile hai
+          # ya fir direct compile:
+          # sdcc -mstm8 --out-fmt-ihx main.c -o firmware.ihx
+          # pack hex
+          packihx firmware.ihx > firmware.hex
+
+      - name: Upload HEX artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: stm8-firmware
+          path: firmware.hex
